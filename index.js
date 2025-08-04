@@ -12,24 +12,21 @@ const client = new Client({
   ],
 });
 
-const { YtDlpPlugin } = require('@distube/yt-dlp');
-
 const distube = new DisTube(client, {
   emitNewSongOnly: true,
   leaveOnFinish: true,
-  plugins: [new YtDlpPlugin()]
+  plugins: [new YtDlpPlugin()],
 });
 
-
 client.once('ready', () => {
-  console.log(`✅ Bot online como ${client.user.tag}`);
+  console.log(`🤖 Bot online como ${client.user.tag}`);
 });
 
 client.on('messageCreate', async message => {
   if (message.author.bot) return;
 
   // Mensagem de boas-vindas
-  if (message.content === '!bemvindo') {
+  if (message.content === 'ibemvindo') {
     message.channel.send(`Seja Bem vindo ${message.author}!`);
   }
 
@@ -38,10 +35,10 @@ client.on('messageCreate', async message => {
     const voiceChannel = message.member.voice.channel;
     if (!voiceChannel) return message.reply('Entre em um canal de voz primeiro!');
 
-    const song = message.content.replace('!play', '').trim();
-    if (!song) return message.reply('Diga o nome ou link da música.');
+    const music = message.content.replace('!play', '').trim();
+    if (!music) return message.reply('Digite o nome ou link da música!');
 
-    await distube.play(voiceChannel, song, {
+    distube.play(voiceChannel, music, {
       textChannel: message.channel,
       member: message.member,
     });
