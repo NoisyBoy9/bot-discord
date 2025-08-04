@@ -19,29 +19,43 @@ const distube = new DisTube(client, {
 });
 
 client.once('ready', () => {
-  console.log(`🤖 Bot online como ${client.user.tag}`);
+  console.log(`✅ Bot online como ${client.user.tag}`);
 });
 
-client.on('messageCreate', async message => {
+client.on('messageCreate', async (message) => {
   if (message.author.bot) return;
 
-  // Mensagem de boas-vindas
-  if (message.content === 'ibemvindo') {
+  // 🎉 Boas-vindas
+  if (message.content === '!bemvindo') {
     message.channel.send(`Seja Bem vindo ${message.author}!`);
   }
 
-  // Comando !play
+  // ▶️ Comando !play
   if (message.content.startsWith('!play')) {
     const voiceChannel = message.member.voice.channel;
     if (!voiceChannel) return message.reply('Entre em um canal de voz primeiro!');
 
-    const music = message.content.replace('!play', '').trim();
-    if (!music) return message.reply('Digite o nome ou link da música!');
+    const song = message.content.replace('!play', '').trim();
+    if (!song) return message.reply('Digite o nome ou link da música!');
 
-    distube.play(voiceChannel, music, {
+    distube.play(voiceChannel, song, {
       textChannel: message.channel,
       member: message.member,
     });
+  }
+
+  // 🔊 Comando !unmute
+  if (message.content === '!unmute') {
+    try {
+      const voiceChannel = message.guild.members.me.voice.channel;
+      if (!voiceChannel) return message.reply('Eu não estou em nenhum canal de voz.');
+
+      await message.guild.members.me.voice.setMute(false);
+      message.reply('Desmutado com sucesso! 🔊');
+    } catch (err) {
+      console.error(err);
+      message.reply('Não consegui me desmutar 😢');
+    }
   }
 });
 
