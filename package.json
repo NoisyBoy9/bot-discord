@@ -1,15 +1,14 @@
 {
-  "name": "discord-music-bot",
+  "name": "bot-discord",
   "version": "1.0.0",
-  "description": "Bot do Discord com boas-vindas e músicas do YouTube",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
   },
   "dependencies": {
     "discord.js": "^14.13.0",
-    "@discordjs/voice": "^0.16.0",
-    "distube": "^4.2.1",
-    "@distube/yt-dlp": "^1.0.1"
+    "distube": "^4.1.1",
+    "@distube/yt-dlp": "^1.1.0",
+    "@discordjs/voice": "^0.14.0"
   }
 }
