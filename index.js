@@ -1,7 +1,6 @@
 require('dotenv').config();
 const { Client, GatewayIntentBits } = require('discord.js');
 const { DisTube } = require('distube');
-const { SpotifyPlugin } = require('@distube/spotify');
 const { YtDlpPlugin } = require('@distube/yt-dlp');
 
 const client = new Client({
@@ -9,48 +8,36 @@ const client = new Client({
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildVoiceStates,
     GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.MessageContent
+    GatewayIntentBits.MessageContent,
+    GatewayIntentBits.GuildMembers,
   ]
 });
 
 const distube = new DisTube(client, {
-  emitNewSongOnly: true,
-  leaveOnFinish: true,
-  plugins: [
-    new SpotifyPlugin(),
-    new YtDlpPlugin()
-  ]
+  plugins: [new YtDlpPlugin()],
 });
 
-client.once('ready', () => {
-  console.log(`✅ Bot online como ${client.user.tag}`);
+client.on('ready', () => {
+  console.log(`✅ Bot logado como ${client.user.tag}`);
 });
 
-client.on('messageCreate', async (message) => {
-  if (!message.guild || message.author.bot) return;
-  const prefix = "!";
-  if (!message.content.startsWith(prefix)) return;
+client.on('guildMemberAdd', member => {
+  const canal = member.guild.channels.cache.find(c => c.name === "bem-vindo");
+  if (canal) canal.send(`Seja bem-vindo ${member.user}!`);
+});
 
-  const args = message.content.slice(prefix.length).trim().split(/ +/g);
+client.on('messageCreate', async (msg) => {
+  if (!msg.content.startsWith('!')) return;
+  const args = msg.content.slice(1).trim().split(/ +/);
   const command = args.shift().toLowerCase();
 
-  if (command === "play") {
-    const channel = message.member.voice.channel;
-    if (!channel) return message.reply("Entre em um canal de voz!");
-    distube.play(channel, args.join(" "), {
-      textChannel: message.channel,
-      member: message.member
+  if (command === 'play') {
+    if (!msg.member.voice.channel) return msg.reply('Entre em um canal de voz!');
+    distube.play(msg.member.voice.channel, args.join(" "), {
+      textChannel: msg.channel,
+      member: msg.member,
     });
   }
-
-  if (command === "stop") {
-    distube.stop(message);
-    message.channel.send("⏹️ Música parada!");
-  }
 });
-
-distube.on("playSong", (queue, song) =>
-  queue.textChannel.send(`🎵 Tocando: \`${song.name}\``)
-);
 
 client.login(process.env.TOKEN);
