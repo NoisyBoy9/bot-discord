@@ -12,11 +12,14 @@ const client = new Client({
   ],
 });
 
+const { YtDlpPlugin } = require('@distube/yt-dlp');
+
 const distube = new DisTube(client, {
   emitNewSongOnly: true,
   leaveOnFinish: true,
-  plugins: [new YtDlpPlugin()],
+  plugins: [new YtDlpPlugin()]
 });
+
 
 client.once('ready', () => {
   console.log(`✅ Bot online como ${client.user.tag}`);
