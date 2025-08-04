@@ -1,41 +1,46 @@
-require('dotenv').config();
 const { Client, GatewayIntentBits } = require('discord.js');
 const { DisTube } = require('distube');
 const { YtDlpPlugin } = require('@distube/yt-dlp');
+const { joinVoiceChannel } = require('@discordjs/voice');
 
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
-    GatewayIntentBits.GuildVoiceStates,
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.MessageContent,
-    GatewayIntentBits.GuildMembers,
-  ]
+    GatewayIntentBits.GuildVoiceStates,
+  ],
 });
 
 const distube = new DisTube(client, {
+  emitNewSongOnly: true,
+  leaveOnFinish: true,
   plugins: [new YtDlpPlugin()],
 });
 
-client.on('ready', () => {
-  console.log(`✅ Bot logado como ${client.user.tag}`);
+client.once('ready', () => {
+  console.log(`✅ Bot online como ${client.user.tag}`);
 });
 
-client.on('guildMemberAdd', member => {
-  const canal = member.guild.channels.cache.find(c => c.name === "bem-vindo");
-  if (canal) canal.send(`Seja bem-vindo ${member.user}!`);
-});
+client.on('messageCreate', async message => {
+  if (message.author.bot) return;
 
-client.on('messageCreate', async (msg) => {
-  if (!msg.content.startsWith('!')) return;
-  const args = msg.content.slice(1).trim().split(/ +/);
-  const command = args.shift().toLowerCase();
+  // Mensagem de boas-vindas
+  if (message.content === '!bemvindo') {
+    message.channel.send(`Seja Bem vindo ${message.author}!`);
+  }
 
-  if (command === 'play') {
-    if (!msg.member.voice.channel) return msg.reply('Entre em um canal de voz!');
-    distube.play(msg.member.voice.channel, args.join(" "), {
-      textChannel: msg.channel,
-      member: msg.member,
+  // Comando !play
+  if (message.content.startsWith('!play')) {
+    const voiceChannel = message.member.voice.channel;
+    if (!voiceChannel) return message.reply('Entre em um canal de voz primeiro!');
+
+    const song = message.content.replace('!play', '').trim();
+    if (!song) return message.reply('Diga o nome ou link da música.');
+
+    await distube.play(voiceChannel, song, {
+      textChannel: message.channel,
+      member: message.member,
     });
   }
 });
